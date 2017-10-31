@@ -1,9 +1,10 @@
-import React, {PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 import LoginForm from './LoginForm';
+import Auth from '../Auth/Auth';
 
 class LoginPage extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
     this.state = {
       errors: {},
       user: {
@@ -20,7 +21,37 @@ class LoginPage extends React.Component {
     const email = this.state.user.email;
     const password = this.state.user.password;
 
-    // TODO; post login data.
+    fetch("http://localhost:3000/auth/login", {
+      method: "POST",
+      cache: false,
+      headers: {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    }).then(response => {
+      if (response.status === 200) {
+        this.setState({
+          errors: {}
+        });
+        response.json().then(json => {
+          console.log(json);
+          Auth.authenticateUser(json.token, email);
+          this.context.router.replace("/");
+        });
+      }
+      else {
+        console.log("login failed");
+        response.json().then(json => {
+          const errors = json.errors ? json.errors : {};
+          errors.summay = json.message;
+          this.setState({ errors });
+        });
+      }
+    });
   }
 
   changeUser = (event) => {
@@ -41,5 +72,9 @@ class LoginPage extends React.Component {
     );
   }
 }
+
+LoginPage.contextTypes = {
+  router: PropTypes.object.isRequired
+};
 
 export default LoginPage;

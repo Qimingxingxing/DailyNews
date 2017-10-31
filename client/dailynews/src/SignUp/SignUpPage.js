@@ -2,8 +2,8 @@ import React, { PropTypes } from 'react';
 import SignUpForm from './SignUpForm';
 
 class SignUpPage extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor(props, context) {
+        super(props, context);
         this.state = {
             errors: {},
             user: {
@@ -23,6 +23,33 @@ class SignUpPage extends React.Component {
         if (password !== confirm_password) {
             return;
         }
+
+        fetch("http://localhost:3000/auth/signup", {
+            method: "POST",
+            cache: false,
+            headers: {
+                "accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        }).then(response => {
+            if (response.status === 200) {
+                this.setState({
+                    errors: {}
+                });
+                this.context.router.replace("/login");
+            }
+            else {
+                response.json().then(json => {
+                    const errors = json.errors ? json.errors : {};
+                    errors.summay = json.message;
+                    this.setState({ errors });
+                });
+            }
+        });
     }
 
     changeUser = (event) => {
@@ -52,5 +79,7 @@ class SignUpPage extends React.Component {
     }
 
 }
-
+SignUpPage.contextTypes = {
+    router: PropTypes.object.isRequired
+  };
 export default SignUpPage;

@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import './LoginForm.css';
+import { Link } from 'react-router';
 
 class LoginForm extends React.Component {
     constructor(props) {
@@ -30,7 +31,7 @@ class LoginForm extends React.Component {
                         </div>
 
                         <button type="submit" className="btn btn-default">Submit</button>
-                        <p> Don't have an account? <a href="/signup">Sign up</a></p>
+                        <p> Don't have an account? <Link to="/signup">Sign up</Link></p>
 
                     </form>
                 </div>
