@@ -3,7 +3,7 @@ import hashlib
 import redis
 import os
 import sys
-
+import base64
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import news_api_client
@@ -42,9 +42,12 @@ while True:
     num_of_news_news = 0
 
     for news in news_list:
-        news_digest = hashlib.md5(news['title'].encode('utf-8')).digest().encode('base64')
-
-        if redis_client.get(news_digest) is None:
+        news_digest = news['title'].encode('utf-8')
+        m = hashlib.md5()
+        m.update((news_digest))
+        news_digest = m.hexdigest()
+        res = redis_client.get(news_digest)
+        if res is None:
             num_of_news_news = num_of_news_news + 1
             news['digest'] = news_digest
 
@@ -56,6 +59,6 @@ while True:
 
             cloudAMQP_client.sendMessage(news)
 
-    print "Fetched %d news." % num_of_news_news 
+    print ("Fetched %d news." % num_of_news_news)
 
     cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)
