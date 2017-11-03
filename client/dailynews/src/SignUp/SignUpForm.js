@@ -1,50 +1,42 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
 import './SignUpForm.css';
 import { Link } from 'react-router';
 
-class SignUpForm extends React.Component {
-    constructor(props) {
-        super(props);
-        this.onSubmit = props.onsubmit;
-        this.onChange = props.onChange;
-        this.errors = props.errors;
-        this.user = props.user;
-    }
+const SignUpForm = ({
+    onSubmit,
+    onChange,
+    errors,
+    user
+  }) => (
+        <div className="container-fluid">
+            <h2 className="text-center"> Sign up</h2>
+            <div className="signup-panel">
+                <form action="/" onSubmit={onSubmit}>
 
-    render() {
-        return (
-            <div className="container-fluid">
-                <h2 className="text-center"> Sign up</h2>
-                <div className="signup-panel">
-                    <form onSubmit={this.onSubmit} action="/">
+                    {errors.summary && <div className="row"><p>{errors.summary}</p></div>}
+                    <div className="form-group">
+                        <label htmlFor="email">Email address:</label>
+                        <input type="email" className="form-control" name="email" id="email" onChange={onChange}/>
+                    </div>
 
-                        {this.errors.summary && <div className="row"><p>{this.errors.summary}</p></div>}
-                        <div className="form-group">
-                            <label for="email">Email address:</label>
-                            <input type="email" className="form-control" name="email" id="email" />
-                        </div>
+                    {errors.email && <div className="row"><p className="error-message">{errors.email}</p></div>}
+                    <div className="form-group">
+                        <label htmlFor="pwd">Password:</label>
+                        <input type="password" className="form-control" name="password" id="pwd" onChange={onChange} />
+                    </div>
 
-                        {this.errors.email && <div className="row"><p className="error-message">{this.errors.email}</p></div>}
-                        <div className="form-group">
-                            <label for="pwd">Password:</label>
-                            <input type="password" className="form-control" name="password" id="pwd" onChange={this.onChange} />
-                        </div>
+                    {errors.password && <div className="row"><p className="error-message">{errors.password}</p></div>}
+                    <div className="form-group">
+                        <label htmlFor="pwd">Confirm Password:</label>
+                        <input type="password" className="form-control" name="confirm_password" id="pwd" onChange={onChange} />
+                    </div>
 
-                        {this.errors.password && <div className="row"><p className="error-message">{this.errors.password}</p></div>}
-                        <div className="form-group">
-                            <label for="pwd">Confirm Password:</label>
-                            <input type="password" className="form-control" name="confirm_password" id="pwd" onChange={this.onChange} />
-                        </div>
+                    <input type="submit" className="btn btn-default" value='Sign Up' />
+                    <p> Already have an account? <Link href="/login">Login</Link></p>
 
-                        <button type="submit" className="btn btn-default">Submit</button>
-                        <p> Already have an account? <Link href="/login">Login</Link></p>
-
-                    </form>
-                </div>
+                </form>
             </div>
-        );
-    }
+        </div>
+    );
 
-}
-  
 export default SignUpForm;

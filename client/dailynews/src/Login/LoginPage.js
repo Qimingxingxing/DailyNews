@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import LoginForm from './LoginForm';
 import Auth from '../Auth/Auth';
 
@@ -37,19 +38,19 @@ class LoginPage extends React.Component {
         this.setState({
           errors: {}
         });
-        response.json().then(json => {
+        response.json().then(function(json) {
           console.log(json);
           Auth.authenticateUser(json.token, email);
           this.context.router.replace("/");
-        });
+        }.bind(this));
       }
       else {
         console.log("login failed");
-        response.json().then(json => {
+        response.json().then(function(json) {
           const errors = json.errors ? json.errors : {};
           errors.summay = json.message;
           this.setState({ errors });
-        });
+        }.bind(this));
       }
     });
   }
@@ -72,6 +73,7 @@ class LoginPage extends React.Component {
     );
   }
 }
+
 
 LoginPage.contextTypes = {
   router: PropTypes.object.isRequired

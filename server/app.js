@@ -1,36 +1,47 @@
+var bodyParser = require('body-parser');
+var config = require('./config/config.json');
+var cors = require('cors');
 var express = require('express');
+var passport = require('passport');
 var path = require('path');
 
+// routers
+var auth = require('./routes/auth');
 var index = require('./routes/index');
+var news = require('./routes/news');
+
 var app = express();
-var news = require("./routes/news");
+
+require('./models/main.js').connect(config.mongoDbUri);
+
 // view engine setup
-app.set('views', path.join(__dirname, '../client/dailynews/build/'));
+app.set('views', path.join(__dirname, '../client/build/'));
 app.set('view engine', 'jade');
-app.use("/static", express.static(path.join(__dirname, "../client/dailynews/build/static/")));
-app.all('*', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-with");
-  next();
-});
+app.use('/static', express.static(path.join(__dirname, '../client/build/static/')));
+
+// Load passport strategies
+app.use(passport.initialize());
+var localSignupStrategy = require('./passport/signup_passport');
+var localLoginStrategy = require('./passport/login_passport');
+passport.use('local-signup', localSignupStrategy);
+passport.use('local-login', localLoginStrategy);
+
+// TODO: remove thsi after development is done.
+app.use(cors());
+
+app.use(bodyParser.json());
+
 app.use('/', index);
-app.use("/news", news);
-// app.get("/secret", function (req, res, next) {
-//   res.json({"secret":"Headers"});
-// });
-// app.use("/secret", function (req, res, next) {
-//   console.log("hehe1");
-//   next();
-// });
+app.use('/auth', auth);
+const authCheckMiddleware = require('./middlewire/auth_checker');
+app.use('/news', authCheckMiddleware);
+app.use('/news', news);
 
-// app.get("/secret", function (req, res, next) {
-//   // res.json({"secret":"Headers"});
-// });
-
+// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
-  next(err);
+  res.send('404 Not Found');
 });
 
 module.exports = app;

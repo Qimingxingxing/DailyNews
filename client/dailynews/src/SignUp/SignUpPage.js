@@ -1,5 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import SignUpForm from './SignUpForm';
+import Auth from '../Auth/Auth';
 
 class SignUpPage extends React.Component {
     constructor(props, context) {
@@ -15,8 +17,12 @@ class SignUpPage extends React.Component {
     }
 
     processForm = (event) => {
-
+        event.preventDefault();
+        for (var i = 0; i < 5; i++) {
+            console.log("success");
+        }
         const email = this.state.user.email;
+        console.log(email);
         const password = this.state.user.password;
         const confirm_password = this.state.user.confirm_password;
 
@@ -53,6 +59,7 @@ class SignUpPage extends React.Component {
     }
 
     changeUser = (event) => {
+
         const field = event.target.name;
         const user = this.state.user;
         user[field] = event.target.value;
@@ -81,5 +88,5 @@ class SignUpPage extends React.Component {
 }
 SignUpPage.contextTypes = {
     router: PropTypes.object.isRequired
-  };
+};
 export default SignUpPage;
