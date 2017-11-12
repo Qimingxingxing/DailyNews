@@ -15,9 +15,9 @@ var app = express();
 require('./models/main.js').connect(config.mongoDbUri);
 
 // view engine setup
-app.set('views', path.join(__dirname, '../client/build/'));
+app.set('views', path.join(__dirname, '../client/dailynews/build/'));
 app.set('view engine', 'jade');
-app.use('/static', express.static(path.join(__dirname, '../client/build/static/')));
+app.use('/static', express.static(path.join(__dirname, '../client/dailynews/build/static/')));
 
 // Load passport strategies
 app.use(passport.initialize());

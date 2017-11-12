@@ -33,5 +33,6 @@ function logNewsClickForUser(user_id, news_id) {
 
 module.exports = {
   add : add,
-  getNewsSummariesForUser : getNewsSummariesForUser  
+  getNewsSummariesForUser : getNewsSummariesForUser,
+  logNewsClickForUser: logNewsClickForUser
 };

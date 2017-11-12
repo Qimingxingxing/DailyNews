@@ -18,9 +18,6 @@ class SignUpPage extends React.Component {
 
     processForm = (event) => {
         event.preventDefault();
-        for (var i = 0; i < 5; i++) {
-            console.log("success");
-        }
         const email = this.state.user.email;
         console.log(email);
         const password = this.state.user.password;
@@ -49,11 +46,11 @@ class SignUpPage extends React.Component {
                 this.context.router.replace("/login");
             }
             else {
-                response.json().then(json => {
+                response.json().then(function(json){
                     const errors = json.errors ? json.errors : {};
                     errors.summay = json.message;
                     this.setState({ errors });
-                });
+                }.bind(this));
             }
         });
     }

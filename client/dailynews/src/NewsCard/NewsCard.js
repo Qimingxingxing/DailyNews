@@ -3,7 +3,7 @@ import "./NewsCard.css";
 import Auth from '../Auth/Auth';
 
 class NewsCard extends React.Component {
-    handleClick = (url) => {
+    redirectToUrl = (url) => {
         this.sendClickLog();
         window.open(url, "_blank");
     }
@@ -23,7 +23,7 @@ class NewsCard extends React.Component {
     
     render() {
         return (
-            <div className="news-container" onClick={this.handleClick}>
+            <div className="news-container" onClick={this.handleClick} onClick={() => this.redirectToUrl(this.props.news.url)}>
                 <div className="row">
                     <div className="col-md-4 fill">
                         <img className="img-responsive" src={this.props.news.urlToImage} alt='news' />

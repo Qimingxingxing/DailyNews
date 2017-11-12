@@ -23,8 +23,8 @@ import sys
 # import common package in parent directory
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
-import mongodb_client
-from cloudAMQP_client import CloudAMQPClient
+import mongodbClient
+from cloudAMQPClient import CloudAMQPClient
 
 # Don't modify this value unless you know what you are doing.
 NUM_OF_CLASSES = 17
@@ -33,8 +33,8 @@ ALPHA = 0.1
 
 SLEEP_TIME_IN_SECONDS = 1
 
-LOG_CLICKS_TASK_QUEUE_URL = ""
-LOG_CLICKS_TASK_QUEUE_NAME = ""
+LOG_CLICKS_TASK_QUEUE_URL = "amqp://nlgunvmq:q3TbyLERkJ_-4TFtpZYRKDGIbO71pK6i@elephant.rmq.cloudamqp.com/nlgunvmq"
+LOG_CLICKS_TASK_QUEUE_NAME = "tap-news-log-clicks-task-queue"
 
 PREFERENCE_MODEL_TABLE_NAME = "user_preference_model"
 NEWS_TABLE_NAME = "news"
@@ -54,12 +54,12 @@ def handle_message(msg):
     newsId = msg['newsId']
 
     # Update user's preference
-    db = mongodb_client.get_db()
+    db = mongodbClient.get_db()
     model = db[PREFERENCE_MODEL_TABLE_NAME].find_one({'userId': userId})
 
     # If model not exists, create a new one
     if model is None:
-        print 'Creating preference model for new user: %s' % userId
+        print('Creating preference model for new user: %s' % userId)
         new_model = {'userId' : userId}
         preference = {}
         for i in news_classes.classes:
@@ -67,17 +67,17 @@ def handle_message(msg):
         new_model['preference'] = preference
         model = new_model
 
-    print 'Updating preference model for new user: %s' % userId
+    print ('Updating preference model for new user: %s' % userId)
 
     # Update model using time decaying method
     news = db[NEWS_TABLE_NAME].find_one({'digest': newsId})
     if (news is None
         or 'class' not in news
         or news['class'] not in news_classes.classes):
-        print news is None
-        print 'class' not in news
-        print news['class'] not in news_classes.classes
-        print 'Skipping processing...'
+        print (news is None)
+        print ('class' not in news)
+        print (news['class'] not in news_classes.classes)
+        print ('Skipping processing...')
         return
 
     click_class = news['class']
@@ -96,13 +96,14 @@ def handle_message(msg):
 def run():
     while True:
         if cloudAMQP_client is not None:
+            print("hello")
             msg = cloudAMQP_client.getMessage()
             if msg is not None:
                 # Parse and process the task
                 try:
                     handle_message(msg)
                 except Exception as e:
-                    print e
+                    print(e)
                     pass
             # Remove this if this becomes a bottleneck.
             cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)

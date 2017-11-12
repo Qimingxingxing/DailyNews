@@ -7,6 +7,7 @@ import sys
 
 from bson.json_util import dumps
 from datetime import datetime
+import news_recommendation_service_client
 
 # import common package in parent directory
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
@@ -57,9 +58,18 @@ def getNewsSummariesForUser(user_id, page_num):
 
         sliced_news = total_news[begin_index:end_index]
 
+    # Get preference for the user
+    preference = news_recommendation_service_client.getPreferenceForUser(user_id)
+    topPreference = None
+
+    if preference is not None and len(preference) > 0:
+        topPreference = preference[0]
+
     for news in sliced_news:
         # Remove text field to save bandwidth.
         del news['text']
+        if news['class'] == topPreference:
+            news['reason'] = 'Recommend'
         if news['publishedAt'].date() == datetime.today().date():
             news['time'] = 'today'
     return json.loads(dumps(sliced_news))
@@ -67,10 +77,11 @@ def getNewsSummariesForUser(user_id, page_num):
 
 def logNewsClickForUser(user_id, news_id):
     message = {'userId': user_id, 'newsId': news_id, 'timestamp': datetime.utcnow()}
-
-    db = mongodb_client.get_db()
+    
+    db = mongodbClient.get_db()
     db[CLICK_LOGS_TABLE_NAME].insert(message)
 
     # Send log task to machine learning service for prediction
     message = {'userId': user_id, 'newsId': news_id, 'timestamp': str(datetime.utcnow())}
+    print("************************************************")
     cloudAMQP_client.sendMessage(message); 
