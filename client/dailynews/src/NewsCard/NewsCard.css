@@ -10,10 +10,7 @@
   }
   
   .news-description {
-    text-align: left;
-  }
-  
-  .news-description p {
+    text-align: justify;
     font-size: 18px;
   }
   
@@ -37,3 +34,6 @@
       object-fit: cover;
   }
   
+  .label{
+    margin-right: 10px;
+  }
