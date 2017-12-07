@@ -32,7 +32,7 @@ const SignUpForm = ({
                     </div>
 
                     <input type="submit" className="btn btn-default" value='Sign Up' />
-                    <p> Already have an account? <Link href="/login">Login</Link></p>
+                    <p> Already have an account? <Link to="/login">Login</Link></p>
 
                 </form>
             </div>

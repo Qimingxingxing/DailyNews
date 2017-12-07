@@ -18,7 +18,6 @@ class LoginPage extends React.Component {
   // Pre-submission.
   processForm = (event) => {
     event.preventDefault();
-
     const email = this.state.user.email;
     const password = this.state.user.password;
 
@@ -73,10 +72,7 @@ class LoginPage extends React.Component {
     );
   }
 }
-
-
 LoginPage.contextTypes = {
   router: PropTypes.object.isRequired
 };
-
 export default LoginPage;

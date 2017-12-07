@@ -1,47 +1,35 @@
-var bodyParser = require('body-parser');
-var config = require('./config/config.json');
-var cors = require('cors');
 var express = require('express');
-var passport = require('passport');
 var path = require('path');
-
-// routers
-var auth = require('./routes/auth');
+var bodyParser = require('body-parser');
+var cors = require("cors");
+var passport = require('passport');
 var index = require('./routes/index');
-var news = require('./routes/news');
+var news = require("./routes/news");
+var auth = require('./routes/auth');
 
+var mongoose = require('mongoose');
 var app = express();
 
-require('./models/main.js').connect(config.mongoDbUri);
-
-// view engine setup
-app.set('views', path.join(__dirname, '../client/dailynews/build/'));
-app.set('view engine', 'jade');
-app.use('/static', express.static(path.join(__dirname, '../client/dailynews/build/static/')));
-
-// Load passport strategies
+mongoose.connect("mongodb://localhost/test");
+require('./models/user');
 app.use(passport.initialize());
 var localSignupStrategy = require('./passport/signup_passport');
 var localLoginStrategy = require('./passport/login_passport');
 passport.use('local-signup', localSignupStrategy);
 passport.use('local-login', localLoginStrategy);
-
-// TODO: remove thsi after development is done.
-app.use(cors());
-
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json());
-
+app.use(cors())
+app.use('/static', express.static(path.join(__dirname, '../client/dailynews/build/static/')));
 app.use('/', index);
-app.use('/auth', auth);
-const authCheckMiddleware = require('./middlewire/auth_checker');
-app.use('/news', authCheckMiddleware);
-app.use('/news', news);
-
+app.use("/news", news);
+app.use("/auth", auth)
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
-  res.send('404 Not Found');
+  next(err);
 });
 
 module.exports = app;
