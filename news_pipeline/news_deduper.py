@@ -10,14 +10,15 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodbClient
 from cloudAMQPClient import CloudAMQPClient
-
+from flask import Flask
+app = Flask(__name__)
 # TODO: use your own queue.
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://nlgunvmq:q3TbyLERkJ_-4TFtpZYRKDGIbO71pK6i@elephant.rmq.cloudamqp.com/nlgunvmq"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "ming"
 
 SLEEP_TIME_IN_SECONDS = 1
 
-NEWS_TABLE_NAME = "news-test"
+NEWS_TABLE_NAME = "news"
 
 SAME_NEWS_SIMILARITY_THRESHOLD = 0.9
 
@@ -57,7 +58,7 @@ def handle_message(msg):
 
     task['publishedAt'] = parser.parse(task['publishedAt'])
     db[NEWS_TABLE_NAME].replace_one({'digest': task['digest']}, task, upsert=True)
-
+app.run(host='0.0.0.0', port=3002)
 while True:
     if cloudAMQP_client is not None:
         msg = cloudAMQP_client.getMessage()

@@ -10,7 +10,7 @@ var auth = require('./routes/auth');
 var mongoose = require('mongoose');
 var app = express();
 
-mongoose.connect("mongodb://localhost/test");
+mongoose.connect("mongodb://0.0.0.0/test");
 require('./models/user');
 app.use(passport.initialize());
 var localSignupStrategy = require('./passport/signup_passport');

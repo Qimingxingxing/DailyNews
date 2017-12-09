@@ -8,6 +8,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import news_api_client
 from cloudAMQPClient import CloudAMQPClient
+from flask import Flask
+app = Flask(__name__)
 
 SLEEP_TIME_IN_SECONDS = 10
 NEWS_TIME_OUT_IN_SECONDS = 3600 * 24 * 3
@@ -34,7 +36,7 @@ NEWS_SOURCES = [
 
 redis_client = redis.StrictRedis(REDIS_HOST, REDIS_PORT)
 cloudAMQP_client = CloudAMQPClient(SCRAPE_NEWS_TASK_QUEUE_URL, SCRAPE_NEWS_TASK_QUEUE_NAME)
-
+app.run(host='0.0.0.0', port=3002)
 while True:
     news_list = news_api_client.getNewsFromSource(NEWS_SOURCES)
 

@@ -53,7 +53,7 @@ class NewsCard extends React.Component {
     };
 
     sendClickLog() {
-        let url = 'http://localhost:3000/news/userId/' + Auth.getEmail()
+        let url = 'http://0.0.0.0:3000/news/userId/' + Auth.getEmail()
             + '/newsId/' + this.props.news.digest;
 
         let request = new Request(encodeURI(url), {

@@ -9,6 +9,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'scrapers'))
 
 import cnn_news_scraper
 from cloudAMQPClient import CloudAMQPClient
+from flask import Flask
+app = Flask(__name__)
 
 # TODO: use your own queue.
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://nlgunvmq:q3TbyLERkJ_-4TFtpZYRKDGIbO71pK6i@elephant.rmq.cloudamqp.com/nlgunvmq"
@@ -35,7 +37,7 @@ def handle_message(msg):
     article.parse()
     task['text'] = article.text
     dedupe_news_queue_client.sendMessage(task)
-
+app.run(host='0.0.0.0', port=3001)
 while True:
     if scrape_news_queue_client is not None:
         msg = scrape_news_queue_client.getMessage()
