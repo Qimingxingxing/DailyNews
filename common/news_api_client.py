@@ -2,7 +2,7 @@ import requests
 from json import loads
 
 NEWS_API_ENDPOINT = 'https://newsapi.org/v1/'
-NEWS_API_KEY = '134861432d8b4b888c42af53ed415e8b'
+NEWS_API_KEY = '6db2c251e87d4a2aab95ce6c54ef02cc'
 
 ARTICLES_API = 'articles'
 
@@ -11,7 +11,7 @@ BBC_SPORT = 'bbc-sport'
 CNN = 'cnn'
 
 DEFAULT_SOURCES = [BBC_NEWS, CNN]
-SORT_BY_TOP = 'top'
+SORT_BY_TOP = 'latest'
 
 def buildUrl(endPoint=NEWS_API_ENDPOINT, apiName=ARTICLES_API):
     return endPoint + apiName

@@ -21,7 +21,7 @@ REDIS_PORT = 6379
 NEWS_TABLE_NAME = "news"
 CLICK_LOGS_TABLE_NAME = 'click_logs'
 
-NEWS_LIMIT = 100
+NEWS_LIMIT = 1000
 NEWS_LIST_BATCH_SIZE = 10
 USER_NEWS_TIME_OUT_IN_SECONDS = 60
 
@@ -67,7 +67,6 @@ def getNewsSummariesForUser(user_id, page_num):
 
     for news in sliced_news:
         # Remove text field to save bandwidth.
-        del news['text']
         if news['class'] == topPreference:
             news['reason'] = 'Recommend'
         if news['publishedAt'].date() == datetime.today().date():
@@ -83,5 +82,5 @@ def logNewsClickForUser(user_id, news_id):
 
     # Send log task to machine learning service for prediction
     message = {'userId': user_id, 'newsId': news_id, 'timestamp': str(datetime.utcnow())}
-    print("************************************************")
+    print("message")
     cloudAMQP_client.sendMessage(message); 

@@ -13,8 +13,8 @@ from cloudAMQPClient import CloudAMQPClient
 # TODO: use your own queue.
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://nlgunvmq:q3TbyLERkJ_-4TFtpZYRKDGIbO71pK6i@elephant.rmq.cloudamqp.com/nlgunvmq"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "ming"
-SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://rycoqlnb:z0-umJZmFer58h7gAF7Y6X1cdcjAfePe@elephant.rmq.cloudamqp.com/rycoqlnb"
-SCRAPE_NEWS_TASK_QUEUE_NAME = "firstAmqp"
+SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://kmeuftuc:TcE9KYA2slDOG-ozMN2zVkGVrJ8pu7j4@spider.rmq.cloudamqp.com/kmeuftuc"
+SCRAPE_NEWS_TASK_QUEUE_NAME = "news"
 
 SLEEP_TIME_IN_SECONDS = 5
 
@@ -39,6 +39,7 @@ def handle_message(msg):
 while True:
     if scrape_news_queue_client is not None:
         msg = scrape_news_queue_client.getMessage()
+        print("hello")            
         if msg is not None:
             try:
                 handle_message(msg)

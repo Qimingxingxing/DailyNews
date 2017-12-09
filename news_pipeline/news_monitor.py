@@ -16,9 +16,8 @@ REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 
 # TODO: use your own queue
-SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://rycoqlnb:z0-umJZmFer58h7gAF7Y6X1cdcjAfePe@elephant.rmq.cloudamqp.com/rycoqlnb"
-SCRAPE_NEWS_TASK_QUEUE_NAME = "firstAmqp"
-
+SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://kmeuftuc:TcE9KYA2slDOG-ozMN2zVkGVrJ8pu7j4@spider.rmq.cloudamqp.com/kmeuftuc"
+SCRAPE_NEWS_TASK_QUEUE_NAME = "news"
 NEWS_SOURCES = [
     'bbc-news',
     'bbc-sport',

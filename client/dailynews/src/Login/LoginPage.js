@@ -47,7 +47,8 @@ class LoginPage extends React.Component {
         console.log("login failed");
         response.json().then(function(json) {
           const errors = json.errors ? json.errors : {};
-          errors.summay = json.message;
+          errors.summary = json.message;
+          console.log(errors);
           this.setState({ errors });
         }.bind(this));
       }

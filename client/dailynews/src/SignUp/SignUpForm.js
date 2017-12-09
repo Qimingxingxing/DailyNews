@@ -2,41 +2,91 @@ import React from 'react';
 import './SignUpForm.css';
 import { Link } from 'react-router';
 
-const SignUpForm = ({
-    onSubmit,
-    onChange,
-    errors,
-    user
-  }) => (
-        <div className="container-fluid">
-            <h2 className="text-center"> Sign up</h2>
-            <div className="signup-panel">
-                <form action="/" onSubmit={onSubmit}>
+import { withStyles } from 'material-ui/styles';
+import Input, { InputLabel } from 'material-ui/Input';
+import { FormControl, FormHelperText } from 'material-ui/Form';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
+import Button from 'material-ui/Button';
 
-                    {errors.summary && <div className="row"><p>{errors.summary}</p></div>}
-                    <div className="form-group">
-                        <label htmlFor="email">Email address:</label>
-                        <input type="email" className="form-control" name="email" id="email" onChange={onChange}/>
-                    </div>
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        marginTop: 30,
+    },
+    button: {
+        margin: theme.spacing.unit,
+    },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    formControl: {
+        margin: theme.spacing.unit,
+    },
+    errorMessage: {
+        color: "red",
+    }
+});
 
-                    {errors.email && <div className="row"><p className="error-message">{errors.email}</p></div>}
-                    <div className="form-group">
-                        <label htmlFor="pwd">Password:</label>
-                        <input type="password" className="form-control" name="password" id="pwd" onChange={onChange} />
-                    </div>
+class SignUpForm extends React.Component {
+    render() {
+        const { classes } = this.props;
+        const onChange = this.props.onChange;
+        const onSubmit = this.props.onSubmit;
+        const errors = this.props.errors;
+        const user = this.props.user;
+        return (
+            <div className="panel">
+                <div className={classes.root}>
+                    <form onSubmit={onSubmit} action="/">
+                        <Typography type="title" gutterBottom>
+                            Sign up
+                            </Typography>
+                        {errors.summary && <div className={classes.errorMessage}><p>{errors.summary}</p></div>}
 
-                    {errors.password && <div className="row"><p className="error-message">{errors.password}</p></div>}
-                    <div className="form-group">
-                        <label htmlFor="pwd">Confirm Password:</label>
-                        <input type="password" className="form-control" name="confirm_password" id="pwd" onChange={onChange} />
-                    </div>
+                        <Grid justify="center" container spacing={0}>
+                            <Grid item xs={4} sm={4}>
+                                <FormControl fullWidth className={classes.formControl}>
+                                    <InputLabel htmlFor="name-helper">Email address:</InputLabel>
+                                    <Input id="name-helper" type="email" name="email" onChange={onChange} />
+                                    <FormHelperText>email address</FormHelperText>
+                                </FormControl>
+                                {errors.email && <div className={classes.errorMessage}><p>{errors.email}</p></div>}
+                            </Grid>
+                        </Grid>
 
-                    <input type="submit" className="btn btn-default" value='Sign Up' />
-                    <p> Already have an account? <Link to="/login">Login</Link></p>
+                        <Grid justify="center" container spacing={0}>
+                            <Grid item xs={4} sm={4}>
+                                <FormControl fullWidth className={classes.formControl}>
+                                    <InputLabel htmlFor="name-helper">Password</InputLabel>
+                                    <Input id="name-helper" type="password" name="password" onChange={onChange} />
+                                    <FormHelperText>Password</FormHelperText>
+                                </FormControl>
+                                {errors.password && <div className={classes.errorMessage}><p>{errors.password}</p></div>}
+                            </Grid>
+                        </Grid>
 
-                </form>
+                        <Grid justify="center" container spacing={0}>
+                            <Grid item xs={4} sm={4}>
+                                <FormControl fullWidth className={classes.formControl}>
+                                    <InputLabel htmlFor="name-helper">Confirm Password</InputLabel>
+                                    <Input id="name-helper" type="password" name="confirm_password" onChange={onChange} />
+                                    <FormHelperText>Confirm Password</FormHelperText>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
+
+                        <Button type="submit" raised color="accent" className={classes.button} className="button">
+                            Sign up
+                            </Button>
+                        <p> Already have an account? <Link to="/login">Login</Link></p>
+                    </form>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
+}
 
-export default SignUpForm;
+export default withStyles(styles)(SignUpForm);
