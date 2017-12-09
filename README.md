@@ -8,7 +8,7 @@ This is a real time news application for personal side project, the app is deplo
 
 ### Project Architecture
 
-![](/Users/qimingzhang/react/DailyNews/architecture.png)
+![](architecture.png)
 
 ### App Profile
 ![](profile.png)
