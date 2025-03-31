@@ -15,5 +15,5 @@ classes = [
     "Advertisements",
     "Crime",
     "Other",
-    "Magazine"
+    "Magazine",
 ]

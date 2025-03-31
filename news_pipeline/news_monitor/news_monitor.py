@@ -5,9 +5,9 @@ import os
 import time
 import logging
 from common.news_api_client import getNewsFromSource
-from common.kafkaClient import KafkaClient
+from common.kafkaClient import KafkaProducer
 
-SLEEP_TIME_IN_SECONDS = 10
+SLEEP_TIME_IN_SECONDS = 1
 NEWS_TIME_OUT_IN_SECONDS = 3600 * 24 * 3
 
 # Get configuration from environment variables
@@ -16,7 +16,7 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 
 # Kafka configuration
 KAFKA_SERVERS = os.getenv("KAFKA_SERVERS", "localhost:9092")
-SCRAPE_NEWS_TASK_QUEUE_TOPIC = "news-scrape-task"
+SCRAPE_NEWS_TASK_QUEUE_TOPIC = "scrape_task"
 
 NEWS_SOURCES = [
     "bbc-news",
@@ -39,7 +39,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 redis_client = redis.StrictRedis(REDIS_HOST, REDIS_PORT)
-kafka_client = KafkaClient(KAFKA_SERVERS, SCRAPE_NEWS_TASK_QUEUE_TOPIC)
+kafka_client = KafkaProducer(KAFKA_SERVERS, SCRAPE_NEWS_TASK_QUEUE_TOPIC)
 
 
 def run():
@@ -70,7 +70,9 @@ def run():
                 kafka_client.sendMessage(news)
 
         logger.info("Fetched %d news.", num_of_news_news)
-
+        kafka_client.sendMessage(
+            {"url": "https://www.bbc.com/news/articles/cn91lzrrx2qo"}
+        )
         # Sleep for a while before next fetch
         time.sleep(SLEEP_TIME_IN_SECONDS)
 

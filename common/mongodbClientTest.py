@@ -1,14 +1,16 @@
 import mongodbClient as client
 
+
 def test_basic():
-    db = client.get_db('test')
+    db = client.get_db("test")
     db.testCollection.drop()
     assert db.testCollection.count() == 0
-    db.testCollection.insert({'test': 1, 'hello': 'world'})
+    db.testCollection.insert({"test": 1, "hello": "world"})
     assert db.testCollection.count() == 1
     db.testCollection.drop()
     assert db.testCollection.count() == 0
-    print ('test_basic passed.')
+    print("test_basic passed.")
+
 
 if __name__ == "__main__":
     test_basic()

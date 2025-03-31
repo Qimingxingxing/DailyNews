@@ -4,7 +4,7 @@ services:
   news-monitor:
     build:
       context: .
-      dockerfile: news_pipeline/Dockerfile
+      dockerfile: news_pipeline/news_monitor/Dockerfile
     environment:
       - REDIS_HOST=redis
       - KAFKA_SERVERS=kafka:9092
@@ -13,6 +13,33 @@ services:
     depends_on:
       - redis
       - kafka
+      - mongodb
+    networks:
+      - news_network
+
+  news-fetcher:
+    build:
+      context: .
+      dockerfile: news_pipeline/scrapers/Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - KAFKA_SERVERS=kafka:9092
+    depends_on:
+      - redis
+      - kafka
+      - mongodb
+    networks:
+      - news_network
+
+  news-deduper:
+    build:
+      context: .
+      dockerfile: news_pipeline/news_deduper/Dockerfile
+    environment:
+      - KAFKA_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+      - mongodb
     networks:
       - news_network
 
@@ -41,6 +68,10 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_LOG4J_LOGGERS: "kafka=ERROR, kafka.server=ERROR, kafka.controller=ERROR, kafka.network=ERROR"
+    volumes:
+      - ./kafka_data:/var/lib/kafka/data
     depends_on:
       - zookeeper
     networks:
@@ -50,6 +81,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - news_network
 
 networks:
   news_network:

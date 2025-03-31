@@ -1,7 +1,6 @@
 import json
 import os
 import pickle
-import random
 import redis
 import sys
 
@@ -10,7 +9,7 @@ from datetime import datetime
 import news_recommendation_service_client
 
 # import common package in parent directory
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
 
 import mongodbClient
 from cloudAMQPClient import CloudAMQPClient
@@ -19,7 +18,7 @@ REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
 NEWS_TABLE_NAME = "news"
-CLICK_LOGS_TABLE_NAME = 'click_logs'
+CLICK_LOGS_TABLE_NAME = "click_logs"
 
 NEWS_LIMIT = 1000
 NEWS_LIST_BATCH_SIZE = 10
@@ -29,7 +28,10 @@ LOG_CLICKS_TASK_QUEUE_URL = "amqp://nlgunvmq:q3TbyLERkJ_-4TFtpZYRKDGIbO71pK6i@el
 LOG_CLICKS_TASK_QUEUE_NAME = "tap-news-log-clicks-task-queue"
 
 redis_client = redis.StrictRedis(REDIS_HOST, REDIS_PORT, db=0)
-cloudAMQP_client = CloudAMQPClient(LOG_CLICKS_TASK_QUEUE_URL, LOG_CLICKS_TASK_QUEUE_NAME)
+cloudAMQP_client = CloudAMQPClient(
+    LOG_CLICKS_TASK_QUEUE_URL, LOG_CLICKS_TASK_QUEUE_NAME
+)
+
 
 def getNewsSummariesForUser(user_id, page_num):
     page_num = int(page_num)
@@ -46,13 +48,17 @@ def getNewsSummariesForUser(user_id, page_num):
         # If end_index is out of range (begin_index is within the range), this
         # will return all remaining news ids.
         sliced_news_digests = news_digests[begin_index:end_index]
-        print (sliced_news_digests)
+        print(sliced_news_digests)
         db = mongodbClient.get_db()
-        sliced_news = list(db[NEWS_TABLE_NAME].find({'digest':{'$in':sliced_news_digests}}))
+        sliced_news = list(
+            db[NEWS_TABLE_NAME].find({"digest": {"$in": sliced_news_digests}})
+        )
     else:
         db = mongodbClient.get_db()
-        total_news = list(db[NEWS_TABLE_NAME].find().sort([('publishedAt', -1)]).limit(NEWS_LIMIT))
-        total_news_digests = list(map(lambda x:x['digest'], total_news))
+        total_news = list(
+            db[NEWS_TABLE_NAME].find().sort([("publishedAt", -1)]).limit(NEWS_LIMIT)
+        )
+        total_news_digests = list(map(lambda x: x["digest"], total_news))
         redis_client.set(user_id, pickle.dumps(total_news_digests))
         redis_client.expire(user_id, USER_NEWS_TIME_OUT_IN_SECONDS)
 
@@ -67,20 +73,24 @@ def getNewsSummariesForUser(user_id, page_num):
 
     for news in sliced_news:
         # Remove text field to save bandwidth.
-        if news['class'] == topPreference:
-            news['reason'] = 'Recommend'
-        if news['publishedAt'].date() == datetime.today().date():
-            news['time'] = 'today'
+        if news["class"] == topPreference:
+            news["reason"] = "Recommend"
+        if news["publishedAt"].date() == datetime.today().date():
+            news["time"] = "today"
     return json.loads(dumps(sliced_news))
 
 
 def logNewsClickForUser(user_id, news_id):
-    message = {'userId': user_id, 'newsId': news_id, 'timestamp': datetime.utcnow()}
-    
+    message = {"userId": user_id, "newsId": news_id, "timestamp": datetime.utcnow()}
+
     db = mongodbClient.get_db()
     db[CLICK_LOGS_TABLE_NAME].insert(message)
 
     # Send log task to machine learning service for prediction
-    message = {'userId': user_id, 'newsId': news_id, 'timestamp': str(datetime.utcnow())}
+    message = {
+        "userId": user_id,
+        "newsId": news_id,
+        "timestamp": str(datetime.utcnow()),
+    }
     print("message")
-    cloudAMQP_client.sendMessage(message); 
+    cloudAMQP_client.sendMessage(message)

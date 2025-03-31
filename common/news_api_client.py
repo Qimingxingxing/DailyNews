@@ -2,7 +2,7 @@ import requests
 from json import loads
 
 NEWS_API_ENDPOINT = "https://newsapi.org/v1/"
-NEWS_API_KEY = "6db2c251e87d4a2aab95ce6c54ef02cc"
+NEWS_API_KEY = "159a9d379deb443bb999115ecee1c441"
 
 ARTICLES_API = "articles"
 
