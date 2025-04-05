@@ -1,4 +1,4 @@
-classes = [
+NEWS_CLASSES = {
     "Colleges & Schools",
     "Environmental",
     "World",
@@ -15,5 +15,5 @@ classes = [
     "Advertisements",
     "Crime",
     "Other",
-    "Magazine",
-]
+    "Magazine"
+}
