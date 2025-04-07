@@ -5,3 +5,9 @@
     padding-top: 38px;
     width: 20%
 }
+
+@media (max-width: 600px) {
+  .logo {
+    width: 40%;
+  }
+}

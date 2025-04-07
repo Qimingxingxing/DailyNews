@@ -1,115 +1,111 @@
 import './NewsPanel.css';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import "./NewsPanel.css";
 import NewsCard from '../NewsCard/NewsCard';
 import Auth from '../Auth/Auth';
-import _ from 'lodash';
-import { CircularProgress } from 'material-ui/Progress';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import { CircularProgress, List, Box, AppBar, Toolbar, Button, Typography, Container } from '@mui/material';
+import { debounce } from 'lodash';
+import { useNavigate } from 'react-router-dom';
 
-import { withStyles } from 'material-ui/styles';
+const NewsPanel = () => {
+  const [news, setNews] = useState(null);
+  const [pageNum, setPageNum] = useState(1);
+  const [loadedAll, setLoadedAll] = useState(false);
+  const navigate = useNavigate();
 
-const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit,
-  },
-  input: {
-    display: 'none',
-  },
-  progress: {
-    margin: `0 ${theme.spacing.unit * 2}px`,
-  }
-});
+  const handleLogout = () => {
+    Auth.logout();
+    navigate('/login');
+  };
 
-class NewsPanel extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { news: null, pageNum: 1, loadedAll: false };
-  }
-  componentDidMount() {
-    this.loadMoreNews();
-    this.loadMoreNews = _.debounce(this.loadMoreNews, 1000);
-    window.addEventListener('scroll', this.handleScroll);
-  }
+  const loadMoreNews = useCallback(() => {
+    if (loadedAll) return;
 
-  handleScroll = () => {
-    let scrollY = window.scrollY ||
-      window.pageYOffset ||
-      document.documentElement.scrollTop;
-    if ((window.innerHeight + scrollY) >= (document.body.offsetHeight - 50)) {
-      this.loadMoreNews();
-    }
-  }
-
-  loadMoreNews() {
-    if (this.state.loadedAll === true) {
-      return;
-    }
-    let url = 'http://0.0.0.0:3000/news/userId/' + Auth.getEmail()
-      + '/pageNum/' + this.state.pageNum;
-
-    let request = new Request(encodeURI(url), {
+    const request = {
       method: 'GET',
       headers: {
-        'Authorization': 'bearer ' + Auth.getToken(),
-      },
-      cache: false
-    });
+        'Authorization': `Bearer ${Auth.getToken()}`
+      }
+    };
 
-    fetch(request)
+    const url = `http://0.0.0.0:3000/news/userId/${Auth.getEmail()}/pageNum/${pageNum}`;
+
+    fetch(url, request)
       .then((res) => res.json())
-      .then((news) => {
-        if (!news || news.length === 0) {
-          this.setState({ loadedAll: true });
+      .then((response) => {
+        const newsResult = response.result;
+        if (!newsResult || newsResult.length === 0) {
+          setLoadedAll(true);
+          return;
         }
 
-        this.setState({
-          news: this.state.news ? this.state.news.concat(news) : news,
-          pageNum: this.state.pageNum + 1
-        });
+        setNews(prevNews => prevNews ? [...prevNews, ...newsResult] : newsResult);
+        setPageNum(prev => prev + 1);
+      })
+      .catch(error => {
+        console.error('Error loading news:', error);
       });
-  }
+  }, [pageNum, loadedAll]);
 
+  useEffect(() => {
+    loadMoreNews();
+    const debouncedLoadMore = debounce(loadMoreNews, 1000);
+    window.addEventListener('scroll', debouncedLoadMore);
+    return () => window.removeEventListener('scroll', debouncedLoadMore);
+  }, [loadMoreNews]);
 
-  renderNews() {
-    const { classes } = this.props;
-
-    const news_list = this.state.news.map(function (news) {
-      return (
-        <ListItem style={{ justifyContent: 'center' }}>
-          <NewsCard news={news} />
-        </ListItem>
-      );
-    });
-
-    return (
-      <List className={classes.root}>
-        {news_list}
-      </List>
-    )
-  }
-
-  render() {
-    const { classes } = this.props;
-    if (this.state.news) {
-      return (
-        <div>
-          {this.renderNews()}
-          <CircularProgress className={classes.progress} style={{
-            justifyContent: 'center', marginLeft: '50%'
-          }} color="accent" />
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <div id='msg-app-loading'>
-            Loading...
-          </div>
-        </div>
-      );
+  const handleScroll = () => {
+    const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+    if ((window.innerHeight + scrollY) >= document.body.offsetHeight - 50) {
+      loadMoreNews();
     }
-  }
-}
+  };
 
-export default withStyles(styles)(NewsPanel);
+  if (!news) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <>
+      <Box sx={{
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        p: 2,
+        zIndex: 1000
+      }}>
+        <Button
+          variant="outlined"
+          onClick={handleLogout}
+          sx={{
+            textTransform: 'none',
+            backgroundColor: 'white',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }}
+        >
+          Logout
+        </Button>
+      </Box>
+      <Box sx={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '20px',
+        '& > *': {
+          marginBottom: '40px !important'
+        }
+      }}>
+        {news.map((newsItem, index) => (
+          <NewsCard key={newsItem.digest || index} news={newsItem} />
+        ))}
+      </Box>
+    </>
+  );
+};
+
+export default NewsPanel;

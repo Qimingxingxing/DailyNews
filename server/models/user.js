@@ -4,34 +4,33 @@ const bcrypt = require('bcrypt');
 const UserSchema = new mongoose.Schema({
   email: {
     type: String,
-    index: { unique: true }
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
   },
-  password: String,
+  password: {
+    type: String,
+    required: true
+  }
+}, {
+  timestamps: true
 });
 
-UserSchema.methods.comparePassword = function comparePassword(
-  password, callback) {
-    bcrypt.compare(password, this.password, callback);
+UserSchema.methods.comparePassword = async function(password) {
+  return bcrypt.compare(password, this.password);
 };
 
-UserSchema.pre('save', function saveHook(next) {
-  const user = this;
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
 
-  // processed futher only if the password is modified or the user is new.
-  if (!user.isModified('password')) return next();
-
-  return bcrypt.genSalt((saltError, salt) => {
-    if (saltError) { return next(saltError); }
-
-    return bcrypt.hash(user.password, salt, (hashError, hash) => {
-      if (hashError) { return next(hashError); }
-
-      // replace a password string with hashed value
-      user.password = hash;
-
-      return next();
-    });
-  });
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = mongoose.model('User', UserSchema);

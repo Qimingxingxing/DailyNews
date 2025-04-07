@@ -1,6 +1,11 @@
 import logging
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+
 from common.mongodbClient import get_db
-from common.kafkaClient import KafkaConsumerClient, KafkaProducerClient
+from common.kafkaClient import KafkaConsumer, KafkaProducer
 from constants import NEWS_CLASSES
 
 # Don't modify this value unless you know what you are doing.
@@ -16,8 +21,8 @@ LOG_CLICKS_TASK_QUEUE_TOPIC = "tap-news-log-clicks-task-queue"
 PREFERENCE_MODEL_TABLE_NAME = "user_preference_model"
 NEWS_TABLE_NAME = "news"
 
-kafka_consumer_client = KafkaConsumerClient(KAFKA_SERVERS, LOG_CLICKS_TASK_QUEUE_TOPIC)
-kafka_producer_client = KafkaProducerClient(KAFKA_SERVERS, LOG_CLICKS_TASK_QUEUE_TOPIC)
+kafka_consumer_client = KafkaConsumer(KAFKA_SERVERS, LOG_CLICKS_TASK_QUEUE_TOPIC)
+kafka_producer_client = KafkaProducer(KAFKA_SERVERS, LOG_CLICKS_TASK_QUEUE_TOPIC)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

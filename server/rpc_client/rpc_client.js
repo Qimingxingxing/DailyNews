@@ -1,7 +1,7 @@
-var jayson = require('jayson');
+const jayson = require('jayson');
 
 // Create a client connected to backend server
-var client = jayson.client.http({
+const client = jayson.client.http({
   port: 4040,
   hostname: 'localhost'
 });
@@ -16,24 +16,27 @@ function add(a, b, callback) {
 }
 
 // Get news summaries for a user
-function getNewsSummariesForUser(user_id, page_num, callback) {
-  client.request('getNewsSummariesForUser', [user_id, page_num], function(err, error, response) {
-    if (err) throw err;
-    console.log(response);
-    callback(response);
+const getNewsSummariesForUser = (userId, pageNum) => {
+  return new Promise((resolve, reject) => {
+    client.request('get_news_summaries_for_user', [userId, pageNum], (err, response) => {
+      if (err) reject(err);
+      resolve(response);
+    });
   });
-}
+};
 
 // Log a news click event for a user
-function logNewsClickForUser(user_id, news_id) {
-  client.request('logNewsClickForUser', [user_id, news_id], function(err, error, response) {
-    if (err) throw err;
-    console.log(response);
+const logNewsClickForUser = (userId, newsId) => {
+  return new Promise((resolve, reject) => {
+    client.request('log_news_click_for_user', [userId, newsId], (err, response) => {
+      if (err) reject(err);
+      resolve(response);
+    });
   });
-}
+};
 
 module.exports = {
   add : add,
-  getNewsSummariesForUser : getNewsSummariesForUser,
-  logNewsClickForUser : logNewsClickForUser
+  getNewsSummariesForUser,
+  logNewsClickForUser
 };

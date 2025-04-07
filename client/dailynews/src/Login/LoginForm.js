@@ -1,89 +1,89 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import './LoginForm.css';
-import { Link } from 'react-router';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Container,
+  Alert
+} from '@mui/material';
 
-import { withStyles } from 'material-ui/styles';
-import Input, { InputLabel } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
+const LoginForm = ({ onSubmit, errors, user, onChange }) => {
+  const navigate = useNavigate();
 
-const styles = theme => ({
-    root: {
-        flexGrow: 1,
-        marginTop: 30,
-    },
-    button: {
-        margin: theme.spacing.unit,
-    },
-    container: {
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
-    formControl: {
-        margin: theme.spacing.unit,
-    },
-    errorMessage: {
-        color: "red",
-    }
-});
+  return (
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Login
+        </Typography>
 
-class LoginForm extends React.Component {
-    render() {
-        const { classes } = this.props;
-        const onChange = this.props.onChange;
-        const onSubmit = this.props.onSubmit;
-        const errors = this.props.errors;
-        const user = this.props.user;
-        return (
-            <div className="panel">
-                <div className={classes.root}>
-                    <form onSubmit={onSubmit} action="/">
-                        <Typography type="title" gutterBottom>
-                            login
-                        </Typography>
-                        {errors.summary && <div className={classes.errorMessage}><p>{errors.summary}</p></div>}
-                        <Grid justify="center" container spacing={0}>
-                            <Grid item xs={4} sm={4}>
-                                <FormControl fullWidth className={classes.formControl}>
-                                    <InputLabel htmlFor="name-helper">Email address:</InputLabel>
-                                    <Input id="name-helper" type="email" name="email" onChange={onChange} />
-                                    <FormHelperText>Email address</FormHelperText>
-                                </FormControl>
-                                {errors.email && <div className={classes.errorMessage}><p>{errors.email}</p></div>}
-                            </Grid>
-                        </Grid>
+        {errors.summary && (
+          <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+            {errors.summary}
+          </Alert>
+        )}
 
-                        <Grid justify="center" container spacing={0}>
-                            <Grid item xs={4} sm={4}>
-                                <FormControl fullWidth className={classes.formControl}>
-                                    <InputLabel htmlFor="name-helper">Password</InputLabel>
-                                    <Input id="name-helper" type="password" name="password" onChange={onChange} />
-                                    <FormHelperText>Password</FormHelperText>
-                                </FormControl>
-                                {errors.password && <div className={classes.errorMessage}><p>{errors.password}</p></div>}
-                            </Grid>
-                        </Grid>
+        <Box component="form" onSubmit={onSubmit} sx={{ mt: 3 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={user.email}
+            onChange={onChange}
+            error={!!errors.email}
+            helperText={errors.email}
+          />
 
-                        <Button type="submit" raised color="accent" className={classes.button} className="button">
-                            submit
-                        </Button>
-                        <p> Don't have an account? <Link to="/signup">Sign up</Link></p>
-                    </form>
-                </div>
-            </div>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={user.password}
+            onChange={onChange}
+            error={!!errors.password}
+            helperText={errors.password}
+          />
 
-        );
-    }
-}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Sign In
+          </Button>
 
-LoginForm.propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-    onChange: PropTypes.func.isRequired,
-    errors: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2">
+              Don't have an account?{' '}
+              <Link to="/signup" style={{ textDecoration: 'none' }}>
+                Sign up
+              </Link>
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
+  );
 };
-export default withStyles(styles)(LoginForm);
+
+export default LoginForm;

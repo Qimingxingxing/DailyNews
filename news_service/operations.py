@@ -6,6 +6,9 @@ import logging
 from bson.json_util import dumps
 from datetime import datetime
 import news_recommendation_service_client
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from common.mongodbClient import get_db
 from common.kafkaClient import KafkaProducer
 
@@ -51,7 +54,7 @@ def get_news_summaries_for_user(user_id, page_num):
     else:
         db = get_db()
         total_news = list(
-            db[NEWS_TABLE_NAME].find().sort([("publishedAt", -1)]).limit(NEWS_LIMIT)
+            db[NEWS_TABLE_NAME].find().sort([("published_at", -1)]).limit(NEWS_LIMIT)
         )
         total_news_digests = list(map(lambda x: x["digest"], total_news))
         redis_client.set(user_id, pickle.dumps(total_news_digests))
@@ -70,7 +73,7 @@ def get_news_summaries_for_user(user_id, page_num):
         # Remove text field to save bandwidth.
         if news["class"] == top_preference:
             news["reason"] = "Recommend"
-        if news["publishedAt"].date() == datetime.today().date():
+        if news["published_at"].date() == datetime.today().date():
             news["time"] = "today"
     return json.loads(dumps(sliced_news))
 

@@ -10,7 +10,15 @@ var auth = require('./routes/auth');
 var mongoose = require('mongoose');
 var app = express();
 
-mongoose.connect("mongodb://0.0.0.0/test");
+mongoose.connect("mongodb://127.0.0.1/test", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch(err => {
+  console.error('MongoDB connection error:', err);
+});
+
 require('./models/user');
 app.use(passport.initialize());
 var localSignupStrategy = require('./passport/signup_passport');

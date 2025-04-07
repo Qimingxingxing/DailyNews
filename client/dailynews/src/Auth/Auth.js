@@ -1,16 +1,16 @@
 class Auth{
     static authenticateUser(token, email){
         localStorage.setItem("token", token);
-        localStorage.setItem("email", email);        
+        localStorage.setItem("email", email);
     }
 
     static isUserAuthenticated(){
-        return localStorage.getItem('token') !== null;        
+        return localStorage.getItem('token') !== null;
     }
 
     static deauthenticate(){
         localStorage.removeItem("token");
-        localStorage.removeItem("email");        
+        localStorage.removeItem("email");
     }
 
     static getToken(){
@@ -19,6 +19,10 @@ class Auth{
 
     static getEmail(){
         return localStorage.getItem("email");
+    }
+
+    static logout() {
+        this.deauthenticate();
     }
 }
 

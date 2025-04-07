@@ -1,5 +1,8 @@
 import datetime
 import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 import logging
 from dateutil import parser
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -35,7 +38,7 @@ def handle_message(msg):
         logger.warning("Message text is None: %s", task)
         return
 
-    published_at = parser.parse(task["publishedAt"])
+    published_at = parser.parse(task["published_at"])
     published_at_day_begin = datetime.datetime(
         published_at.year, published_at.month, published_at.day, 0, 0, 0, 0
     )
@@ -44,7 +47,7 @@ def handle_message(msg):
     same_day_news_list = list(
         db[NEWS_TABLE_NAME].find(
             {
-                "publishedAt": {
+                "published_at": {
                     "$gte": published_at_day_begin,
                     "$lt": published_at_day_end,
                 }
@@ -70,7 +73,7 @@ def handle_message(msg):
                 )
                 return
 
-    task["publishedAt"] = parser.parse(task["publishedAt"])
+    task["published_at"] = parser.parse(task["published_at"])
     db[NEWS_TABLE_NAME].replace_one({"digest": "abc"}, task, upsert=True)
     logger.info("Inserted/Updated news in database: %s", task["url"])
 
@@ -81,7 +84,7 @@ while True:
         if msg is not None:
             # Parse and process the task
             try:
-                logger.info("Received message: %s", msg)
+                logger.info("Received message")
                 handle_message(msg)
             except Exception as e:
                 logger.error("Error handling message: %s", e)

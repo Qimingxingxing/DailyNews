@@ -1,88 +1,72 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SignUpForm from './SignUpForm';
 import Auth from '../Auth/Auth';
 
-class SignUpPage extends React.Component {
-    constructor(props, context) {
-        super(props, context);
-        this.state = {
-            errors: {},
-            user: {
-                email: '',
-                password: '',
-                confirm_password: ''
-            }
-        };
+const SignUpPage = () => {
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+  const [user, setUser] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const handleChange = (event) => {
+    setUser({
+      ...user,
+      [event.target.name]: event.target.value
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (user.password !== user.confirmPassword) {
+      setErrors({
+        confirmPassword: "Passwords don't match"
+      });
+      return;
     }
 
-    processForm = (event) => {
-        event.preventDefault();
-        const email = this.state.user.email;
-        console.log(email);
-        const password = this.state.user.password;
-        const confirm_password = this.state.user.confirm_password;
+    const request = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: user.email,
+        password: user.password
+      })
+    };
 
-        if (password !== confirm_password) {
-            return;
-        }
-
-        fetch("http://0.0.0.0:3000/auth/signup", {
-            method: "POST",
-            cache: false,
-            headers: {
-                "accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        }).then(response => {
-            if (response.status === 200) {
-                this.setState({
-                    errors: {}
-                });
-                this.context.router.replace("/login");
-            }
-            else {
-                response.json().then(function(json){
-                    const errors = json.errors ? json.errors : {};
-                    errors.summay = json.message;
-                    this.setState({ errors });
-                }.bind(this));
-            }
-        });
-    }
-
-    changeUser = (event) => {
-        const field = event.target.name;
-        const user = this.state.user;
-        user[field] = event.target.value;
-        this.setState({ user });
-        if (this.state.user.password !== this.state.user.confirm_password) {
-            const errors = this.state.errors;
-            errors.password = "Password and Confirm Password don't match.";
-            this.setState({ errors });
+    fetch('http://0.0.0.0:3000/auth/signup', request)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          setErrors({
+            summary: data.error.message
+          });
         } else {
-            const errors = this.state.errors;
-            errors.password = '';
-            this.setState({ errors });
+          Auth.authenticateUser(data.token, user.email);
+          navigate('/');
         }
-    }
-    render() {
-        return (
-            <SignUpForm
-                onSubmit={this.processForm}
-                onChange={this.changeUser}
-                errors={this.state.errors}
-                user={this.state.user}
-            />
-        );
-    }
+      })
+      .catch(error => {
+        setErrors({
+          summary: 'An error occurred during signup'
+        });
+      });
+  };
 
-}
-SignUpPage.contextTypes = {
-    router: PropTypes.object.isRequired
+  return (
+    <SignUpForm
+      onSubmit={handleSubmit}
+      onChange={handleChange}
+      errors={errors}
+      user={user}
+    />
+  );
 };
+
 export default SignUpPage;

@@ -1,79 +1,64 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import Auth from '../Auth/Auth';
 
-class LoginPage extends React.Component {
-  constructor(props, context) {
-    super(props, context);
-    this.state = {
-      errors: {},
-      user: {
-        email: '',
-        password: ''
-      }
-    };
-  }
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+  const [user, setUser] = useState({
+    email: '',
+    password: ''
+  });
 
-  // Pre-submission.
-  processForm = (event) => {
+  const handleChange = (event) => {
+    setUser({
+      ...user,
+      [event.target.name]: event.target.value
+    });
+  };
+
+  const handleSubmit = (event) => {
     event.preventDefault();
-    const email = this.state.user.email;
-    const password = this.state.user.password;
 
-    fetch("http://0.0.0.0:3000/auth/login", {
-      method: "POST",
-      cache: false,
+    const request = {
+      method: 'POST',
       headers: {
-        "accept": "application/json",
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: email,
-        password: password
+        email: user.email,
+        password: user.password
       })
-    }).then(response => {
-      if (response.status === 200) {
-        this.setState({
-          errors: {}
+    };
+
+    fetch('http://0.0.0.0:3000/auth/login', request)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          setErrors({
+            summary: data.error.message
+          });
+        } else {
+          Auth.authenticateUser(data.token, user.email);
+          navigate('/');
+        }
+      })
+      .catch(error => {
+        setErrors({
+          summary: 'An error occurred during login'
         });
-        response.json().then(function(json) {
-          console.log(json);
-          Auth.authenticateUser(json.token, email);
-          this.context.router.replace("/");
-        }.bind(this));
-      }
-      else {
-        console.log("login failed");
-        response.json().then(function(json) {
-          const errors = json.errors ? json.errors : {};
-          errors.summary = json.message;
-          console.log(errors);
-          this.setState({ errors });
-        }.bind(this));
-      }
-    });
-  }
+      });
+  };
 
-  changeUser = (event) => {
-    const field = event.target.name;
-    const user = this.state.user;
-    user[field] = event.target.value;
-    this.setState({ user });
-  }
-
-  render() {
-    return (
-      <LoginForm
-        onSubmit={this.processForm}
-        onChange={this.changeUser}
-        errors={this.state.errors}
-        user={this.state.user}
-      />
-    );
-  }
-}
-LoginPage.contextTypes = {
-  router: PropTypes.object.isRequired
+  return (
+    <LoginForm
+      onSubmit={handleSubmit}
+      onChange={handleChange}
+      errors={errors}
+      user={user}
+    />
+  );
 };
+
 export default LoginPage;

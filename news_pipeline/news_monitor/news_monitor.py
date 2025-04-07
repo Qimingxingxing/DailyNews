@@ -1,13 +1,17 @@
 import datetime
 import hashlib
-import redis
+import sys
 import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+
+import redis
 import time
 import logging
-from common.news_api_client import getNewsFromSource
+from common.news_api_client import get_news_from_source
 from common.kafkaClient import KafkaProducer
 
-SLEEP_TIME_IN_SECONDS = 1
+SLEEP_TIME_IN_SECONDS = 5
 NEWS_TIME_OUT_IN_SECONDS = 3600 * 24 * 3
 
 # Get configuration from environment variables
@@ -45,7 +49,7 @@ kafka_client = KafkaProducer(KAFKA_SERVERS, SCRAPE_NEWS_TASK_QUEUE_TOPIC)
 def run():
     while True:
         logger.info("Fetching news")
-        news_list = getNewsFromSource(NEWS_SOURCES)
+        news_list = get_news_from_source(NEWS_SOURCES)
 
         num_of_news_news = 0
 
@@ -55,24 +59,25 @@ def run():
             m.update((news_digest))
             news_digest = m.hexdigest()
             res = redis_client.get(news_digest)
-            if res is None:
-                num_of_news_news = num_of_news_news + 1
-                news["digest"] = news_digest
+            # if res is None:
+            num_of_news_news = num_of_news_news + 1
+            news["digest"] = news_digest
 
-                if news["publishedAt"] is None:
-                    news["publishedAt"] = datetime.datetime.utcnow().strftime(
-                        "%Y-%m-%dT%H:%M:%SZ"
-                    )
+            if news["publishedAt"] is None:
+                news["published_at"] = datetime.datetime.utcnow().strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
+            else:
+                news["published_at"] = datetime.datetime.strptime(news["publishedAt"], "%Y-%m-%dT%H:%M:%SZ").strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
+                news.pop("publishedAt", None)
+            redis_client.set(news_digest, "True")
+            redis_client.expire(news_digest, NEWS_TIME_OUT_IN_SECONDS)
 
-                redis_client.set(news_digest, "True")
-                redis_client.expire(news_digest, NEWS_TIME_OUT_IN_SECONDS)
-
-                kafka_client.sendMessage(news)
+            kafka_client.sendMessage(news)
 
         logger.info("Fetched %d news.", num_of_news_news)
-        kafka_client.sendMessage(
-            {"url": "https://www.bbc.com/news/articles/cn91lzrrx2qo"}
-        )
         # Sleep for a while before next fetch
         time.sleep(SLEEP_TIME_IN_SECONDS)
 

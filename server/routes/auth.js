@@ -2,78 +2,56 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const validator = require('validator');
+const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
-router.post('/signup', (req, res, next) => {
-  const validationResult = validateSignupForm(req.body);
-  if (!validationResult.success) {
-    console.log('validationResult failed');
-    return res.status(400).json({
-      success: false,
-      message: validationResult.message,
-      errors: validationResult.errors
-    });
-  }
-
-  return passport.authenticate('local-signup', (err) => {
-    if (err) {
-      console.log(err);
-      if (err.name === 'MongoError' && err.code === 11000) {
-        // the 11000 Mongo code is for a duplication email error
-        // the 409 HTTP status code is for conflict error
-        return res.status(409).json({
-          success: false,
-          message: 'Check the form for errors.',
-          errors: {
-            email: 'This email is already taken.'
-          }
-        });
-      }
-
-      return res.status(400).json({
-        success: false,
-        message: 'Could not process the form.'
-      });
+router.post('/signup', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'You have successfully signed up! Now you should be able to log in.'
-    });
-  })(req, res, next);
+    // Create new user
+    const user = new User({ email, password });
+    await user.save();
+
+    // Generate token
+    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET || 'your-secret-key');
+
+    res.status(201).json({ token });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
-router.post('/login', (req, res, next) => {
-  const validationResult = validateLoginForm(req.body);
-  if (!validationResult.success) {
-    return res.status(400).json({
-      success: false,
-      message: validationResult.message,
-      errors: validationResult.errors
-    });
-  }
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  return passport.authenticate('local-login', (err, token, userData) => {
-    if (err) {
-      if (err.name === 'IncorrectCredentialsError') {
-        return res.status(400).json({
-          success: false,
-          message: err.message
-        });
-      }
-
-      return res.status(400).json({
-        success: false,
-        message: 'Could not process the form: ' + err.message
-      });
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    return res.json({
-      success: true,
-      message: 'You have successfully logged in!',
-      token,
-      user: userData
-    });
-  })(req, res, next);
+    // Check password
+    const isValid = await user.comparePassword(password);
+    if (!isValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Generate token
+    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET || 'your-secret-key');
+
+    res.json({ token });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 function validateSignupForm(payload) {
